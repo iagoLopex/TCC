@@ -1,0 +1,15 @@
+# Ambiente Virtual do Python
+venv/
+
+# Arquivos de Cache e Bytecode do Python
+__pycache__/
+*.pyc
+
+# Pasta de Resultados e Logs Gerados
+results/
+ga_log.txt
+run_log.jsonl
+
+# Arquivos de configuração de IDEs (opcional)
+.vscode/
+.idea/
