@@ -20,32 +20,31 @@ O framework está estruturado para ser modular, configurável e para registrar a
 
 ## 📂 Estrutura do Projeto
 
-O projeto é organizado da seguinte forma para garantir a separação de responsabilidades:
+O projeto é organizado com a seguinte estrutura para garantir a separação de responsabilidades:
 
-PROJETOFINAL/
-│
-├── data/
-│   └── SEU_ARQUIVO_DE_DADOS.xlsx
-│
-├── models/
-│   ├── mlp_space.py        # Define a arquitetura e o espaço de busca da MLP
-│   └── rf_space.py         # Define o espaço de busca do Random Forest
-│
-├── optimization/
-│   └── ga_tuner.py         # Contém a classe do Algoritmo Genético
-│
-├── results/
-│   └── run_YYYY-MM-DD_HH-MM-SS/ # Pasta para cada execução
-│       ├── run_log.jsonl       # Log detalhado em formato JSON
-│       └── *.png               # Gráficos de resultados salvos como imagem
-│
-├── .gitignore                # Arquivos e pastas a serem ignorados pelo Git
-├── analysis.py               # Módulo para análise e plotagem final
-├── config.py                 # Painel de controle para configurar o experimento
-├── data_loader.py            # Módulo para carregar e preparar os dados
-├── evaluation.py             # Lógica de avaliação dos modelos
-├── main.py                   # Ponto de entrada principal para executar o projeto
-└── requirements.txt          # Lista de dependências do Python
+- **PROJETOFINAL/**
+  - 📂 **data/**
+    - `SEU_ARQUIVO_DE_DADOS.xlsx`
+  - 📂 **models/**
+    - `__init__.py`
+    - `mlp_space.py` _(Define a arquitetura e o espaço de busca da MLP)_
+    - `rf_space.py` _(Define o espaço de busca do Random Forest)_
+  - 📂 **optimization/**
+    - `__init__.py`
+    - `ga_tuner.py` _(Contém a classe do Algoritmo Genético)_
+  - 📂 **results/** _(Gerada automaticamente)_
+    - `run_YYYY-MM-DD_HH-MM-SS/`
+      - `run_log.jsonl` _(Log detalhado em formato JSON)_
+      - `*.png` _(Gráficos de resultados)_
+  - 📂 **venv/** _(Ignorada pelo .gitignore)_
+  - 📄 `analysis.py` _(Módulo para análise e plotagem final)_
+  - 📄 `config.py` _(Painel de controle para configurar o experimento)_
+  - 📄 `data_loader.py` _(Módulo para carregar e preparar os dados)_
+  - 📄 `evaluation.py` _(Lógica de avaliação dos modelos)_
+  - 📄 `main.py` _(Ponto de entrada principal para executar o projeto)_
+  - 📄 `.gitignore` _(Arquivos e pastas a serem ignorados pelo Git)_
+  - 📄 `README.md` _(Este arquivo)_
+  - 📄 `requirements.txt` _(Lista de dependências do Python)_
 
 
 ---
@@ -55,13 +54,11 @@ PROJETOFINAL/
 Este guia foi feito para um ambiente **Linux (Ubuntu / WSL)**.
 
 ### Pré-requisitos
-
 * Git
 * Python 3.10 ou superior
 * Acesso a um terminal (shell) Bash.
 
 ### Passo 1: Clonar o Repositório
-
 Primeiro, clone este repositório para a sua máquina local.
 
 ```bash
