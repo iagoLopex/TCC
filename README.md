@@ -18,12 +18,14 @@ A variável target CBR nessa base de dados, com relação à quantidade de amost
 
 ![Image](https://github.com/user-attachments/assets/522970d4-d667-46ae-ab90-552a991eaba4)
 
->A proposta utilizada é a possibilidade de atribuição de pesos para as amostras de CBR que tem o valor maior que um valor fixo que o usuário definir, para uma análise mais profunda de como o modelo lida com estes testes.
+>A proposta utilizada é a possibilidade de atribuição de pesos para as amostras de CBR que tem o valor maior que um valor fixo que o usuário definir (Google Developers, 2025), para uma análise mais profunda de como o modelo lida com estes testes.
 
 ## 📚 Referências
 * YABI, C. P. et al. **Prediction of CBR by Deep Artificial Neural Networks with Hyperparameter Optimization by Simulated Annealing**. Indian Geotechnical Journal, v. 54, n. 1, p. 121-137, fev. 2024. Disponível em: <https://doi.org/10.1007/s40098-024-00870-4>. Acesso em: 3 jun. 2025.
 
 * TADO, N.; MEDIHAJIT, S.; PAL, D. **Forecasting California bearing ratio (CBR) of soil using machine learning algorithms: A review**. Research on Engineering Structures and Materials and Materials, v. 11, n. 1, p. 383-398, 2025. Disponível em: <http://dx.doi.org/10.17515/resm2025-623ml0115rv>. Acesso em: 3 jun. 2025.
+
+* Google Developers. (s.d.). **Conjuntos de dados desequilibrados**. Machine Learning Crash Course. Disponível em: <https://developers.google.com/machine-learning/crash-course/classification/handling-imbalanced-classes>. Acesso em: 5 jun. 2025.
 
 * BERNUCCI, Liedi Bariani et al. **Pavimentação asfáltica: formação básica para engenheiros**. 2. ed. Rio de Janeiro: Petrobras, 2022.
 
@@ -39,6 +41,13 @@ A metodologia central deste trabalho consiste em aplicar técnicas de otimizaç�
 >O framework é projetado para executar esses experimentos de forma sistemática, registrando métricas de performance, logs detalhados e visualizações para cada execução, permitindo uma análise comparativa robusta entre os modelos.
 
 ![Image](https://github.com/user-attachments/assets/0382240d-1163-43be-9d6c-810b9c30139a)
+
+
+>Esse fluxograma apresenta a metodologia de testes que o usuário pode efetuar com base nas decisões do mesmo, como escolha de configuração dos dados de entrada com base no dataset dado (representado pelos Datasets 1, 2 e 3), atribuição ou não de pesos para algumas variáveis, e escolha do método de cross-validation (K-fold ou Holdout).
+
+Exemplo de configurações de datasets (a partir do feature selection):
+
+![Image](https://github.com/user-attachments/assets/4029f516-3bb9-496b-882b-4bacacad2b24)
 
 ---
 
@@ -145,13 +154,6 @@ python3 main.py
 ```
 
 >O script começará a otimização. Você verá o progresso no terminal e, ao final, uma nova pasta será criada dentro de results/ com todos os logs e gráficos da execução.
-
-### Passo 6: Desativar o Ambiente
-Quando terminar de trabalhar no projeto, você pode desativar o ambiente virtual.
-
-```bash
-deactivate
-```
 
 ## 📊 Análise dos Resultados
 
