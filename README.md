@@ -163,6 +163,23 @@ python3 main.py
 - *.png: Os gráficos de avaliação do melhor modelo, como a curva de aprendizado e a análise de resíduos, já salvos como imagens.
 - final_model.joblib ou final_model.pth: O objeto do modelo final treinado, pronto para ser carregado e usado em outras análises (como no notebooks_analysis).
 
+## 💡 Dando Continuidade ao Projeto
+A estrutura modular foi projetada para facilitar a expansão.
+
+>Para Adicionar um Novo Modelo (ex: Gradient Boosting):
+ 1. Crie o Arquivo: Crie um novo arquivo models/gb_space.py.
+ 2. Implemente a Classe: Dentro dele, crie uma classe GradientBoostingSpace seguindo a mesma estrutura da MLPBlockSpace ou RandomForestSpace. Ela precisa ter os atributos bounds e types, e os métodos decode e evaluate.
+ 3. Registre o Modelo: No arquivo evaluation.py, importe sua nova classe e adicione-a ao dicionário MODEL_CLASSES:
+
+```Python
+MODEL_CLASSES = {"MLP": MLPBlockSpace, "RF": RandomForestSpace, "GB": GradientBoostingSpace}
+```
+ 4. Configure e Rode: No config.py, mude MODEL_TO_OPTIMIZE = "GB" e execute o main.py.
+
+>Para Testar um Novo Conjunto de Features:
+ 1. Edite o data_loader.py: Adicione uma nova entrada ao dicionário column_map, por exemplo, 'D4', com a lista de colunas desejada.
+ 2. Configure e Rode: No config.py, mude DATASET = "D4" e execute o main.py.
+
 👤 Autor
 Iago Lopes
 
