@@ -2,7 +2,24 @@
 
 > Este projeto utiliza um Algoritmo Genético (AG) para otimizar os hiperparâmetros de modelos de Machine Learning (Rede Neural MLP e Random Forest) com o objetivo de prever o valor do California Bearing Ratio (CBR) de solos.
 
-O framework está estruturado para ser modular, configurável e para registrar automaticamente os resultados de cada execução, facilitando a análise e a reprodutibilidade dos experimentos.
+---
+
+## 📖 Fonte dos Dados e Tratamento
+
+O conjunto de dados utilizado neste projeto foi extraído do estudo de doutorado de **José Gustavo Hermida de Mello Ferreira**, conforme a referência abaixo:
+
+> FERREIRA, JOSÉ GUSTAVO HERMIDA DE MELLO. **Tratamento de Dados Geotécnicos Para Predição de Módulos de Resiliência de Solos e Britas Utilizando Ferramentas de Data Mining**. Tese (D.Sc., Engenharia Civil) - COPPE/UFRJ, Rio de Janeiro, 2008.
+
+O dataset original, contendo 463 amostras, passou por um processo de tratamento e curadoria para esta análise. As variáveis foram renomeadas para maior clareza (e.g., `CH`, `IP`, `CBR`). Para cada experimento, um subconjunto específico de features é selecionado (conforme definido em `config.py`). Subsequentemente, todas as amostras (linhas) que continham valores ausentes (`NaN`) em qualquer uma das colunas selecionadas foram removidas (`dropna()`) para garantir a qualidade e a integridade dos dados de entrada para os modelos.
+
+## 🔬 Metodologia
+
+A metodologia central deste trabalho consiste em aplicar técnicas de otimização e aprendizado de máquina para prever o California Bearing Ratio (CBR) de solos. Utiliza-se um **Algoritmo Genético (AG)** para explorar um vasto espaço de hiperparâmetros e encontrar a configuração ótima para dois modelos de regressão:
+
+1.  **Rede Neural Artificial (MLP - Multi-Layer Perceptron)**
+2.  **Random Forest (Floresta Aleatória)**
+
+O framework é projetado para executar esses experimentos de forma sistemática, registrando métricas de performance, logs detalhados e visualizações para cada execução, permitindo uma análise comparativa robusta entre os modelos.
 
 ---
 
@@ -29,6 +46,8 @@ O projeto é organizado com a seguinte estrutura para garantir a separação de 
     - `__init__.py`
     - `mlp_space.py` _(Define a arquitetura e o espaço de busca da MLP)_
     - `rf_space.py` _(Define o espaço de busca do Random Forest)_
+  - 📂 **notebooks_de_analise/**
+    - `analise_shap.ipynb` _(Notebook para análise de interpretabilidade)_
   - 📂 **optimization/**
     - `__init__.py`
     - `ga_tuner.py` _(Contém a classe do Algoritmo Genético)_
@@ -45,7 +64,6 @@ O projeto é organizado com a seguinte estrutura para garantir a separação de 
   - 📄 `.gitignore` _(Arquivos e pastas a serem ignorados pelo Git)_
   - 📄 `README.md` _(Este arquivo)_
   - 📄 `requirements.txt` _(Lista de dependências do Python)_
-
 
 ---
 
@@ -111,10 +129,11 @@ Bash
 
 deactivate
 📊 Análise dos Resultados
-Após cada execução, navegue até a pasta results/ e encontre a subpasta nomeada com a data e hora da sua execução (ex: run_2025-06-15_18-18-00/). Dentro dela, você encontrará:
+Após cada execução, navegue até a pasta results/ e encontre a subpasta nomeada com a data e hora da sua execução (ex: run_2025-06-17_14-45-00/). Dentro dela, você encontrará:
 
 run_log.jsonl: Um arquivo com o log completo e detalhado de cada geração do algoritmo genético, em formato JSON, ideal para análises programáticas.
 *.png: Os gráficos de avaliação do melhor modelo, como a curva de aprendizado e a análise de resíduos, já salvos como imagens.
+final_model.joblib ou final_model.pth: O objeto do modelo final treinado, pronto para ser carregado e usado em outras análises (como no notebook SHAP).
 👤 Autor
 Iago Lopes
 
