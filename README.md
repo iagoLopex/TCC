@@ -1,141 +1,154 @@
 # Projeto: Otimização de Hiperparâmetros para Predição de CBR
 
-> Este projeto utiliza um Algoritmo Genético (AG) para otimizar os hiperparâmetros de modelos de Machine Learning (Rede Neural MLP e Random Forest) com o objetivo de prever o valor do California Bearing Ratio (CBR) de solos.
+> Este projeto utiliza um Algoritmo Genético (AG) para otimizar os hiperparâmetros de modelos de Machine Learning (MLP e Random Forest) visando prever o California Bearing Ratio (CBR) de solos.
 
 ---
 
 ## 📖 Fonte dos Dados e Tratamento
 
-O conjunto de dados utilizado neste projeto foi extraído do estudo de doutorado de **José Gustavo Hermida de Mello Ferreira**, conforme a referência abaixo:
+O dataset original (463 amostras) foi extraído da tese de doutorado de **José Gustavo Hermida de Mello Ferreira** (2008) e passou por:
 
-> FERREIRA, JOSÉ GUSTAVO HERMIDA DE MELLO. **Tratamento de Dados Geotécnicos Para Predição de Módulos de Resiliência de Solos e Britas Utilizando Ferramentas de Data Mining**. Tese (D.Sc., Engenharia Civil) - COPPE/UFRJ, Rio de Janeiro, 2008.
+1. Renomeação de variáveis para maior clareza (`CH`, `IP`, `CBR`, etc.).
+2. Seleção de subconjuntos de features via `config.py`.
+3. Remoção de todas as linhas com valores ausentes (`dropna()`).
 
-O dataset original, contendo 463 amostras, passou por um processo de tratamento e curadoria para esta análise. As variáveis foram renomeadas para maior clareza (e.g., `CH`, `IP`, `CBR`). Para cada experimento, um subconjunto específico de features é selecionado (conforme definido em `config.py`). Subsequentemente, todas as amostras (linhas) que continham valores ausentes (`NaN`) em qualquer uma das colunas selecionadas foram removidas (`dropna()`) para garantir a qualidade e a integridade dos dados de entrada para os modelos.
+---
 
 ## 🔬 Metodologia
 
-A metodologia central deste trabalho consiste em aplicar técnicas de otimização e aprendizado de máquina para prever o California Bearing Ratio (CBR) de solos. Utiliza-se um **Algoritmo Genético (AG)** para explorar um vasto espaço de hiperparâmetros e encontrar a configuração ótima para dois modelos de regressão:
+Aplicamos um **Algoritmo Genético** para buscar a melhor configuração de hiperparâmetros em dois modelos de regressão:
 
-1.  **Rede Neural Artificial (MLP - Multi-Layer Perceptron)**
-2.  **Random Forest (Floresta Aleatória)**
+1. **MLP (Multi-Layer Perceptron)**  
+2. **Random Forest**
 
-O framework é projetado para executar esses experimentos de forma sistemática, registrando métricas de performance, logs detalhados e visualizações para cada execução, permitindo uma análise comparativa robusta entre os modelos.
+O pipeline executa cada experimento de forma sistemática, gerando:
+
+- Métricas de performance
+- Logs detalhados (JSONL)
+- Gráficos comparativos
 
 ---
 
 ## 🚀 Tecnologias Utilizadas
 
-* **Python 3.10+**
-* **PyTorch**: Para a construção e treino do modelo de Rede Neural (MLP).
-* **Scikit-learn**: Para o modelo Random Forest, pré-processamento de dados e métricas de avaliação.
-* **Pandas & NumPy**: Para manipulação e análise de dados.
-* **Rich**: Para a criação de saídas visualmente agradáveis no terminal.
-* **Tqdm**: Para a exibição de barras de progresso.
-* **Matplotlib & Seaborn**: Para a geração de gráficos de análise.
+- **Python 3.10+**  
+- **PyTorch** (MLP)  
+- **Scikit-learn** (Random Forest, pré-processamento, métricas)  
+- **Pandas & NumPy** (manipulação de dados)  
+- **Rich** (saídas no terminal)  
+- **Tqdm** (barras de progresso)  
+- **Matplotlib & Seaborn** (visualizações)  
 
 ---
 
 ## 📂 Estrutura do Projeto
 
-O projeto é organizado com a seguinte estrutura para garantir a separação de responsabilidades:
+PROJETOFINAL/
+├── data/
+│ └── SEU_ARQUIVO_DE_DADOS.xlsx
+├── models/
+│ ├── init.py
+│ ├── mlp_space.py # Define arquitetura e espaço de busca da MLP
+│ └── rf_space.py # Define espaço de busca do Random Forest
+├── notebooks_de_analise/
+│ └── analise_shap.ipynb # Notebook de interpretabilidade
+├── optimization/
+│ ├── init.py
+│ └── ga_tuner.py # Classe do Algoritmo Genético
+├── results/ # Gerada automaticamente
+│ └── run_YYYY-MM-DD_HH-MM-SS/
+│ ├── run_log.jsonl # Log em JSONL
+│ └── *.png # Gráficos de resultados
+├── venv/ # Ignorado pelo .gitignore
+├── analysis.py # Análise e plotagem final
+├── config.py # Painel de controle do experimento
+├── data_loader.py # Carregamento e preparação dos dados
+├── evaluation.py # Lógica de avaliação dos modelos
+├── main.py # Ponto de entrada principal
+├── .gitignore # Arquivos/pastas ignorados pelo Git
+├── README.md # Este arquivo
+└── requirements.txt # Dependências Python
 
-- **PROJETOFINAL/**
-  - 📂 **data/**
-    - `SEU_ARQUIVO_DE_DADOS.xlsx`
-  - 📂 **models/**
-    - `__init__.py`
-    - `mlp_space.py` _(Define a arquitetura e o espaço de busca da MLP)_
-    - `rf_space.py` _(Define o espaço de busca do Random Forest)_
-  - 📂 **notebooks_de_analise/**
-    - `analise_shap.ipynb` _(Notebook para análise de interpretabilidade)_
-  - 📂 **optimization/**
-    - `__init__.py`
-    - `ga_tuner.py` _(Contém a classe do Algoritmo Genético)_
-  - 📂 **results/** _(Gerada automaticamente)_
-    - `run_YYYY-MM-DD_HH-MM-SS/`
-      - `run_log.jsonl` _(Log detalhado em formato JSON)_
-      - `*.png` _(Gráficos de resultados)_
-  - 📂 **venv/** _(Ignorada pelo .gitignore)_
-  - 📄 `analysis.py` _(Módulo para análise e plotagem final)_
-  - 📄 `config.py` _(Painel de controle para configurar o experimento)_
-  - 📄 `data_loader.py` _(Módulo para carregar e preparar os dados)_
-  - 📄 `evaluation.py` _(Lógica de avaliação dos modelos)_
-  - 📄 `main.py` _(Ponto de entrada principal para executar o projeto)_
-  - 📄 `.gitignore` _(Arquivos e pastas a serem ignorados pelo Git)_
-  - 📄 `README.md` _(Este arquivo)_
-  - 📄 `requirements.txt` _(Lista de dependências do Python)_
+yaml
+Copiar
+Editar
 
 ---
 
-## ⚙️ Como Executar o Projeto (Passo a Passo)
+## ⚙️ Como Executar o Projeto
 
-Este guia foi feito para um ambiente **Linux (Ubuntu / WSL)**.
+Este guia assume **Linux (Ubuntu / WSL)**.
 
 ### Pré-requisitos
-* Git
-* Python 3.10 ou superior
-* Acesso a um terminal (shell) Bash.
+
+- Git  
+- Python 3.10+  
+- Bash (terminal)
+
+---
 
 ### Passo 1: Clonar o Repositório
-Primeiro, clone este repositório para a sua máquina local.
 
 ```bash
-git clone [https://github.com/iagoLopex/TCC.git](https://github.com/iagoLopex/TCC.git)
+git clone https://github.com/iagoLopex/TCC.git
 cd TCC
-Passo 2: Configurar o Ambiente Virtual (venv)
-É crucial usar um ambiente virtual para isolar as dependências do projeto.
+Passo 2: Configurar o Ambiente Virtual
+Instalar venv (Debian/Ubuntu):
 
-Bash
-
-# 1. Garanta que o pacote python3-venv está instalado (para Debian/Ubuntu)
+bash
+Copiar
+Editar
 sudo apt update && sudo apt install python3-venv -y
+Criar o venv:
 
-# 2. Crie o ambiente virtual na pasta do projeto
+bash
+Copiar
+Editar
 python3 -m venv venv
+Ativar o venv:
 
-# 3. Ative o ambiente virtual
+bash
+Copiar
+Editar
 source venv/bin/activate
-Após a ativação, você verá (venv) no início do prompt do seu terminal.
-
-Passo 3: Instalar as Dependências
-Instale todas as bibliotecas necessárias listadas no requirements.txt.
-
-Bash
-
-# Opcional, mas recomendado: atualize o pip
+Passo 3: Instalar Dependências
+bash
+Copiar
+Editar
 pip install --upgrade pip
-
-# Instale os pacotes
 pip install -r requirements.txt
 Passo 4: Configurar o Experimento
-Antes de executar, você pode customizar o experimento editando o arquivo config.py. Nele, você pode alterar:
+Edite o config.py para ajustar:
 
-O modelo a ser otimizado (MODEL_TO_OPTIMIZE).
-O conjunto de dados a ser usado (DATASET).
-O método de validação (VALIDATION_METHOD).
-Os parâmetros do Algoritmo Genético (GA_PARAMS).
+MODEL_TO_OPTIMIZE
+
+DATASET
+
+VALIDATION_METHOD
+
+GA_PARAMS
+
 Passo 5: Executar a Otimização
-Com tudo pronto, basta executar o script principal.
-
-Bash
-
+bash
+Copiar
+Editar
 python3 main.py
-O script começará a otimização. Você verá o progresso no terminal e, ao final, uma nova pasta será criada dentro de results/ com todos os logs e gráficos da execução.
+Ao final, uma nova pasta em results/ será criada com logs e gráficos.
 
 Passo 6: Desativar o Ambiente
-Quando terminar de trabalhar no projeto, você pode desativar o ambiente virtual.
-
-Bash
-
+bash
+Copiar
+Editar
 deactivate
 📊 Análise dos Resultados
-Após cada execução, navegue até a pasta results/ e encontre a subpasta nomeada com a data e hora da sua execução (ex: run_2025-06-17_14-45-00/). Dentro dela, você encontrará:
+Acesse a pasta gerada em results/run_YYYY-MM-DD_HH-MM-SS/ e verifique:
 
-run_log.jsonl: Um arquivo com o log completo e detalhado de cada geração do algoritmo genético, em formato JSON, ideal para análises programáticas.
-*.png: Os gráficos de avaliação do melhor modelo, como a curva de aprendizado e a análise de resíduos, já salvos como imagens.
-final_model.joblib ou final_model.pth: O objeto do modelo final treinado, pronto para ser carregado e usado em outras análises (como no notebook SHAP).
+run_log.jsonl: logs do AG por geração
+
+*.png: curvas de aprendizado, análises de resíduos
+
+final_model.joblib/.pth: modelo treinado para uso posterior
+
 👤 Autor
 Iago Lopes
-
 GitHub: iagoLopex
-<!-- end list -->
