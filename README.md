@@ -12,6 +12,15 @@ O conjunto de dados utilizado neste projeto foi extraído do estudo de doutorado
 
 O dataset original, contendo 463 amostras, passou por um processo de tratamento e curadoria para esta análise. As variáveis foram renomeadas para maior clareza (e.g., `CH`, `IP`, `CBR`). Para cada experimento, um subconjunto específico de features é selecionado (conforme definido em `config.py`). Subsequentemente, todas as amostras (linhas) que continham valores ausentes (`NaN`) em qualquer uma das colunas selecionadas foram removidas (`dropna()`) para garantir a qualidade e a integridade dos dados de entrada para os modelos.
 
+## 📚 Referências
+* YABI, C. P. et al. **Prediction of CBR by Deep Artificial Neural Networks with Hyperparameter Optimization by Simulated Annealing**. Indian Geotechnical Journal, v. 54, n. 1, p. 121-137, fev. 2024. Disponível em: <https://doi.org/10.1007/s40098-024-00870-4>. Acesso em: 3 jun. 2025.
+
+* TADO, N.; MEDIHAJIT, S.; PAL, D. **Forecasting California bearing ratio (CBR) of soil using machine learning algorithms: A review**. Research on Engineering Structures and Materials and Materials, v. 11, n. 1, p. 383-398, 2025. Disponível em: <http://dx.doi.org/10.17515/resm2025-623ml0115rv>. Acesso em: 3 jun. 2025.
+
+* BERNUCCI, Liedi Bariani et al. **Pavimentação asfáltica: formação básica para engenheiros**. 2. ed. Rio de Janeiro: Petrobras, 2022.
+
+* ORTEGA, Julio Bizarreta; AVEROS, Sara Ochoa. **Manual Didático para a Execução do Ensaio Índice de Suporte Califórnia (ISC)**. Foz do Iguaçu: Edunila, 2022.
+
 ## 🔬 Metodologia
 
 A metodologia central deste trabalho consiste em aplicar técnicas de otimização e aprendizado de máquina para prever o California Bearing Ratio (CBR) de solos. Utiliza-se um **Algoritmo Genético (AG)** para explorar um vasto espaço de hiperparâmetros e encontrar a configuração ótima para dois modelos de regressão:
@@ -80,13 +89,17 @@ Este guia foi feito para um ambiente **Linux (Ubuntu / WSL)**.
 Primeiro, clone este repositório para a sua máquina local.
 
 ```bash
-git clone [https://github.com/iagoLopex/TCC.git](https://github.com/iagoLopex/TCC.git)
+# clone do repositório
+git clone https://github.com/iagoLopex/TCC.git
+
+# entrar nele
 cd TCC
-Passo 2: Configurar o Ambiente Virtual (venv)
-É crucial usar um ambiente virtual para isolar as dependências do projeto.
+```
 
-Bash
+### Passo 2: Configurar o Ambiente Virtual (venv) (É crucial usar um ambiente virtual para isolar as dependências do projeto)
 
+
+```bash
 # 1. Garanta que o pacote python3-venv está instalado (para Debian/Ubuntu)
 sudo apt update && sudo apt install python3-venv -y
 
@@ -95,45 +108,49 @@ python3 -m venv venv
 
 # 3. Ative o ambiente virtual
 source venv/bin/activate
+```
 Após a ativação, você verá (venv) no início do prompt do seu terminal.
 
-Passo 3: Instalar as Dependências
-Instale todas as bibliotecas necessárias listadas no requirements.txt.
+### Passo 3: Instalar as Dependências (Instale todas as bibliotecas necessárias listadas no requirements.txt)
 
-Bash
-
+```bash
 # Opcional, mas recomendado: atualize o pip
 pip install --upgrade pip
 
 # Instale os pacotes
 pip install -r requirements.txt
-Passo 4: Configurar o Experimento
-Antes de executar, você pode customizar o experimento editando o arquivo config.py. Nele, você pode alterar:
+```
 
-O modelo a ser otimizado (MODEL_TO_OPTIMIZE).
-O conjunto de dados a ser usado (DATASET).
-O método de validação (VALIDATION_METHOD).
-Os parâmetros do Algoritmo Genético (GA_PARAMS).
-Passo 5: Executar a Otimização
-Com tudo pronto, basta executar o script principal.
+### Passo 4: Configurar o Experimento (Antes de executar, você pode customizar o experimento editando o arquivo config.py. Nele, você pode alterar)
 
-Bash
+ - O modelo a ser otimizado (MODEL_TO_OPTIMIZE).
+ - O conjunto de dados a ser usado (DATASET).
+ - O método de validação (VALIDATION_METHOD).
+ - Os parâmetros do Algoritmo Genético (GA_PARAMS).
+ - Passo 5: Executar a Otimização
+ - Com tudo pronto, basta executar o script principal.
 
+```bash
 python3 main.py
-O script começará a otimização. Você verá o progresso no terminal e, ao final, uma nova pasta será criada dentro de results/ com todos os logs e gráficos da execução.
+```
 
-Passo 6: Desativar o Ambiente
+>O script começará a otimização. Você verá o progresso no terminal e, ao final, uma nova pasta será criada dentro de results/ com todos os logs e gráficos da execução.
+
+### Passo 6: Desativar o Ambiente
 Quando terminar de trabalhar no projeto, você pode desativar o ambiente virtual.
 
-Bash
-
+```bash
 deactivate
-📊 Análise dos Resultados
-Após cada execução, navegue até a pasta results/ e encontre a subpasta nomeada com a data e hora da sua execução (ex: run_2025-06-17_14-45-00/). Dentro dela, você encontrará:
+```
 
-run_log.jsonl: Um arquivo com o log completo e detalhado de cada geração do algoritmo genético, em formato JSON, ideal para análises programáticas.
-*.png: Os gráficos de avaliação do melhor modelo, como a curva de aprendizado e a análise de resíduos, já salvos como imagens.
-final_model.joblib ou final_model.pth: O objeto do modelo final treinado, pronto para ser carregado e usado em outras análises (como no notebook SHAP).
+## 📊 Análise dos Resultados
+
+>Após cada execução, navegue até a pasta results/ e encontre a subpasta nomeada com a data e hora da sua execução (ex: run_2025-06-17_14-45-00/). Dentro dela, você encontrará:
+
+- run_log.jsonl: Um arquivo com o log completo e detalhado de cada geração do algoritmo genético, em formato JSON e os hiperparâmetros utilizados.
+- *.png: Os gráficos de avaliação do melhor modelo, como a curva de aprendizado e a análise de resíduos, já salvos como imagens.
+- final_model.joblib ou final_model.pth: O objeto do modelo final treinado, pronto para ser carregado e usado em outras análises (como no notebooks_analysis).
+
 👤 Autor
 Iago Lopes
 
