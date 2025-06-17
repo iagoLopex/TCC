@@ -1,60 +1,56 @@
-# config.py
-# ==============================================================================
-# PAINEL DE CONTROLE E CONFIGURAÇÕES GLOBAIS
-# ==============================================================================
+"""
+Módulo de Configuração Global (Painel de Controle).
+
+Este arquivo centraliza todos os parâmetros e configurações utilizados no
+experimento de otimização. Alterar as variáveis neste arquivo permite
+controlar o fluxo de execução, os modelos utilizados, os datasets e os
+hiperparâmetros do Algoritmo Genético sem modificar o código principal.
+"""
+
 import os
-import torch
-import torch.nn as nn
+from typing import Any, Dict
+
 import numpy as np
+import torch
 
-# --- Arquivo e Seleção de Features ---
-CSV_PATH = 'data/12_2_3-Jose_Gustavo_2008.xlsx'
-DATASET = 'D1'  # Opções: 'D1', 'D2', ou outro valor para usar o conjunto de features padrão
 
-# --- Configuração Principal do Experimento ---
-MODEL_TO_OPTIMIZE = 'MLP'; USE_WEIGHTS = False; VALIDATION_METHOD = 'Holdout'  # Cenário 1
-# MODEL_TO_OPTIMIZE = 'MLP'; USE_WEIGHTS = False; VALIDATION_METHOD = 'K-fold'   # Cenário 2
-# MODEL_TO_OPTIMIZE = 'MLP'; USE_WEIGHTS = True;  VALIDATION_METHOD = 'Holdout'  # Cenário 3
-# MODEL_TO_OPTIMIZE = 'MLP'; USE_WEIGHTS = True;  VALIDATION_METHOD = 'K-fold'   # Cenário 4
+# --- Parâmetros do Experimento ---
+CSV_PATH: str = "data/12_2_3-Jose_Gustavo_2008.xlsx"
+DATASET: str = "D3"  # Opções: 'D1', 'D2', 'D3' (genérico)
+
+# --- Configuração do Modelo e Validação ---
+MODEL_TO_OPTIMIZE: str = "MLP"  # Opções: 'MLP', 'RF'
+USE_WEIGHTS: bool = False
+VALIDATION_METHOD: str = "Holdout"  # Opções: 'Holdout', 'K-fold'
 
 # --- Configurações Técnicas ---
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-N_JOBS_GA = max(1, os.cpu_count() - 1)
-K_FOLDS = 5
-SEED = 42
+DEVICE: str = "cuda" if torch.cuda.is_available() else "cpu"
+N_JOBS_GA: int = max(1, os.cpu_count() - 1)
+K_FOLDS: int = 5
+SEED: int = 42
 
-# --- Parâmetros de Ponderação ---
-WEIGHT_PARAMS = {
-    'thr': 50.0,
-    'w_major': 1.0,
-    'w_minor': 1.5
-}
+# --- Parâmetros de Ponderação de Amostras (se USE_WEIGHTS = True) ---
+WEIGHT_PARAMS: Dict[str, float] = {"thr": 50.0, "w_major": 1.0, "w_minor": 1.5}
 
 # --- Parâmetros do Algoritmo Genético ---
-GA_PARAMS = {
-    'pop': 2,
-    'gens': 5,
-    'elite': 0.05,
-    'mut': 0.05,
-    'cx': 0.9,
-    'patience': 5,
-    'repeats': 2,
+GA_PARAMS: Dict[str, Any] = {
+    "pop": 2,       # Tamanho da população
+    "gens": 3,      # Número de gerações
+    "elite": 0.1,    # Fração da elite
+    "mut": 0.1,      # Probabilidade de mutação
+    "cx": 0.9,       # Probabilidade de crossover
+    "patience": 10,  # Gerações sem melhora para parada antecipada
+    "repeats": 1,    # Repetições na avaliação de cada indivíduo
 }
 
-# --- Configurações de Reprodutibilidade ---
-def set_seeds():
+
+def set_seeds() -> None:
+    """
+    Define as sementes de aleatoriedade para NumPy e PyTorch para garantir
+    a reprodutibilidade dos experimentos.
+    """
     np.random.seed(SEED)
     torch.manual_seed(SEED)
-    if DEVICE == 'cuda':
+    if DEVICE == "cuda":
         torch.cuda.manual_seed_all(SEED)
     torch.set_num_threads(os.cpu_count())
-
-# --- Mapeamento de Modelos ---
-# Para facilitar a seleção dinâmica das classes de modelo
-from models.mlp_space import MLPBlockSpace
-from models.rf_space import RandomForestSpace
-
-MODEL_CLASSES = {
-    'MLP': MLPBlockSpace,
-    'RF': RandomForestSpace
-}

@@ -1,95 +1,141 @@
-# optimization/ga_tuner.py
+"""
+Módulo que implementa a classe base para o Algoritmo Genético (AG).
 
-import multiprocessing as mp
-import numpy as np
-from tqdm.auto import tqdm
+Este otimizador genérico é projetado para encontrar os melhores
+hiperparâmetros para qualquer problema que possa ser definido por uma
+classe de 'espaço' que forneça limites, decodificação e uma função de avaliação.
+"""
 import logging
+import multiprocessing as mp
+from typing import Any, Dict, List, Tuple
+
+import numpy as np
+from numpy.typing import NDArray
+from tqdm.auto import tqdm
+
 
 class BaseGATuner:
-    # ... (métodos __init__, _rand, _mut, etc. continuam os mesmos) ...
-    """Algoritmo genético para otimização de hiperparâmetros."""
-    def __init__(self, space, seed, n_jobs, **kwargs):
+    """
+    Implementa um Algoritmo Genético para otimização de hiperparâmetros.
+
+    Este otimizador executa um processo evolucionário que inclui seleção
+    de elite, crossover e mutação para encontrar a melhor combinação de
+    hiperparâmetros para um determinado problema.
+
+    Atributos:
+        space (Any): Objeto que define o espaço de busca.
+        seed (int): Semente para reprodutibilidade.
+        n_jobs (int): Número de processos paralelos para avaliação.
+        pop (int): Tamanho da população.
+        gens (int): Número máximo de gerações.
+        elite (float): Fração da elite que sobrevive.
+        mut (float): Probabilidade de mutação de um gene.
+        cx (float): Probabilidade de crossover entre pais.
+        patience (int): Gerações sem melhora para parada antecipada.
+        repeats (int): Repetições na avaliação de cada indivíduo.
+    """
+
+    def __init__(self, space: Any, seed: int, n_jobs: int, **kwargs: Any) -> None:
+        """Inicializa o otimizador do Algoritmo Genético."""
         self.__dict__.update(kwargs)
         self.space = space
         self.seed0 = seed
         self.n_jobs = n_jobs
         self.elite_n = max(1, int(self.elite * self.pop))
         self.rng = np.random.default_rng(seed)
-        self.history = []
+        self.history: List[float] = []
+        self.generation_history: List[Dict[str, Any]] = []
 
-    def _rand(self):
-        return np.array([self.rng.integers(lo, hi + 1) if t == 'int' else self.rng.uniform(lo, hi) 
-                         for (lo, hi), t in zip(self.space.bounds, self.space.types)])
+    def _rand(self) -> NDArray:
+        """Gera um indivíduo (gene) aleatório dentro dos limites definidos."""
+        gene = [
+            self.rng.integers(lo, hi + 1) if t == "int" else self.rng.uniform(lo, hi)
+            for (lo, hi), t in zip(self.space.bounds, self.space.types)
+        ]
+        return np.array(gene)
 
-    def _mut(self, g):
-        for i, t in enumerate(self.space.types):
+    def _mut(self, gene: NDArray) -> NDArray:
+        """Aplica uma mutação a um indivíduo com base na probabilidade `self.mut`."""
+        for i, gene_type in enumerate(self.space.types):
             if self.rng.random() < self.mut:
                 lo, hi = self.space.bounds[i]
-                if t == 'int': g[i] = np.clip(g[i] + self.rng.integers(-1, 2), lo, hi)
-                else: g[i] = np.clip(g[i] + self.rng.normal(0, 0.1 * (hi - lo)), lo, hi)
-        return g
+                if gene_type == "int":
+                    gene[i] = np.clip(gene[i] + self.rng.integers(-1, 2), lo, hi)
+                else:
+                    noise = self.rng.normal(0, 0.1 * (hi - lo))
+                    gene[i] = np.clip(gene[i] + noise, lo, hi)
+        return gene
 
-    def _cx(self, p1, p2):
-        if self.rng.random() > self.cx: return p1.copy(), p2.copy()
-        mask = self.rng.random(len(p1)) < 0.5
-        c1, c2 = p1.copy(), p2.copy()
-        c1[mask], c2[mask] = p2[mask], p1[mask]
-        return c1, c2
+    def _cx(self, parent1: NDArray, parent2: NDArray) -> Tuple[NDArray, NDArray]:
+        """Executa o crossover uniforme entre dois pais com probabilidade `self.cx`."""
+        if self.rng.random() > self.cx:
+            return parent1.copy(), parent2.copy()
+        mask = self.rng.random(len(parent1)) < 0.5
+        child1, child2 = parent1.copy(), parent2.copy()
+        child1[mask], child2[mask] = parent2[mask], parent1[mask]
+        return child1, child2
 
-    def _score(self, gene): 
-        return np.mean([self.space.evaluate(self.space.decode(gene), i) for i in range(self.repeats)])
+    def _score(self, gene: NDArray) -> float:
+        """Calcula a pontuação de fitness de um indivíduo."""
+        cfg = self.space.decode(gene)
+        scores = [self.space.evaluate(cfg, i) for i in range(self.repeats)]
+        return np.mean(scores)
 
-    def _eval_pop(self, pop):
-        if self.n_jobs == 1: return np.array([self._score(g) for g in pop])
-        with mp.Pool(self.n_jobs) as pool: return np.array(pool.map(self._score, pop))
+    def _eval_pop(self, population: List[NDArray]) -> NDArray[np.float64]:
+        """Avalia uma população inteira, usando paralelismo se `n_jobs > 1`."""
+        if self.n_jobs == 1:
+            return np.array([self._score(g) for g in population])
+        with mp.Pool(self.n_jobs) as pool:
+            return np.array(pool.map(self._score, population))
 
+    def run(self) -> Tuple[NDArray, float, List[Dict[str, Any]]]:
+        """
+        Executa o ciclo completo do Algoritmo Genético.
 
-    def run(self):
-        pop = np.array([self._rand() for _ in range(self.pop)])
-        fit = self._eval_pop(pop)
-        
-        # --- INÍCIO DA MODIFICAÇÃO ---
-        generation_history = [] # Lista para guardar o resumo de cada geração
-        bar = tqdm(range(self.gens), desc="Otimizando com GA", unit="gen")
-        # --- FIM DA MODIFICAÇÃO ---
+        Returns:
+            Tuple[NDArray, float, List[Dict[str, Any]]]:
+                - O melhor indivíduo (gene) encontrado.
+                - A melhor pontuação de fitness (menor é melhor).
+                - O histórico de resumos de cada geração.
+        """
+        population = np.array([self._rand() for _ in range(self.pop)])
+        fitness = self._eval_pop(population)
+        bar = tqdm(range(self.gens), desc="Otimizando com GA", unit="gen", leave=False)
 
         for gen in bar:
-            elite = pop[fit.argsort()[ : self.elite_n]]
-            offspring = list(elite)
+            # 1. Seleção: os melhores indivíduos (elite) sobrevivem
+            elite_indices = fitness.argsort()[: self.elite_n]
+            offspring = list(population[elite_indices])
 
+            # 2. Reprodução: gera o resto da população com crossover e mutação
             while len(offspring) < self.pop:
-                p1, p2 = self.rng.choice(pop, 2, replace=False)
-                c1, c2 = self._cx(p1,p2)
+                p1, p2 = self.rng.choice(population, 2, replace=False)
+                c1, c2 = self._cx(p1, p2)
                 offspring.extend([self._mut(c1), self._mut(c2)])
 
-            pop = np.array(offspring)[ : self.pop]
-            fit = self._eval_pop(pop)
-            best_fit = fit.min()
+            # 3. Avaliação da nova geração
+            population = np.array(offspring)[: self.pop]
+            fitness = self._eval_pop(population)
+            best_fitness_in_gen = fitness.min()
 
-            # --- INÍCIO DA MODIFICAÇÃO: LOGGING APENAS PARA ARQUIVO E COLETA DE HISTÓRICO ---
-            best_gen_idx = fit.argmin()
-            best_in_gen = pop[best_gen_idx]
-            
-            # Prepara os dados para o log JSON e para o histórico do console
+            # 4. Registro e Log
+            best_individual_in_gen = population[fitness.argmin()]
             gen_summary = {
-                'generation': gen + 1,
-                'total_generations': self.gens,
-                'best_r2_in_gen': -best_fit,
-                'avg_r2_in_gen': -np.mean(fit),
-                'best_config_in_gen': self.space.decode(best_in_gen)
+                "generation": gen + 1, "total_generations": self.gens,
+                "best_r2_in_gen": -best_fitness_in_gen, "avg_r2_in_gen": -np.mean(fitness),
+                "best_config_in_gen": self.space.decode(best_individual_in_gen),
             }
-            # Adiciona o resumo da geração à lista de histórico
-            generation_history.append(gen_summary)
-            # Loga os dados completos APENAS no arquivo JSON. Não aparecerá no console.
-            logging.info("Progresso da Geração", extra={'json_fields': gen_summary})
-            # --- FIM DA MODIFICAÇÃO ---
+            self.generation_history.append(gen_summary)
+            logging.info("Progresso da Geração", extra={"json_fields": gen_summary})
 
-            bar.set_postfix(best_R2 = f"{-best_fit:.4f}")
-            self.history.append(best_fit)
+            bar.set_postfix(best_R2=f"{-best_fitness_in_gen:.4f}")
+            self.history.append(best_fitness_in_gen)
 
-            if len(self.history) > self.patience and np.std(self.history[-self.patience:]) < 1e-4:
+            # 5. Critério de Parada Antecipada
+            if (len(self.history) > self.patience and
+                    np.std(self.history[-self.patience:]) < 1e-4):
                 logging.warning("Parada antecipada: performance estabilizou.")
                 break
 
-        # --- MODIFICAÇÃO: Retorna o histórico junto com os outros resultados ---
-        return pop[fit.argmin()], fit.min(), generation_history
+        best_idx = fitness.argmin()
+        return population[best_idx], fitness[best_idx], self.generation_history

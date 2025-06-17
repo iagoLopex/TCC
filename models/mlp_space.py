@@ -1,25 +1,59 @@
-# models/mlp_space.py
+"""
+Define o espaço de busca e a lógica de avaliação para uma Rede Neural MLP.
+"""
+from typing import Any, Dict, List, Tuple, Type
+
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import numpy as np
+from numpy.typing import NDArray
 from sklearn.metrics import r2_score
+
 import config
 
+
 class MLPBlockSpace:
-    """Define a arquitetura, espaço de busca e avaliação para o modelo MLP."""
-    n_layers = list(range(1, 10, 1))
-    units = list(range(1, 100, 1))
-    dropout = [0.0, 0.05, 0.1, 0.15]
-    acts = [nn.Tanh, nn.Sigmoid, nn.LogSigmoid]
-    bss = list(range(6, 50, 1))
-    lr_log10 = [0.1, 0.01, 0.001, 0.0001, 0.2, 0.02, 0.002, 0.0002, 0.3, 0.03, 0.003, 0.0003, 0.4, 0.04, 0.004, 0.0004]
+    """
+    Encapsula os hiperparâmetros, a construção, o treino e a avaliação de um
+    modelo MLP para ser usado pelo Algoritmo Genético.
 
-    bounds = np.array([[0, len(n_layers)-1], [0, len(units)-1], [0, len(dropout)-1], 
-                       [0, len(acts)-1], [0, len(bss)-1], [0, len(lr_log10)-1]])
-    types = np.array(['int', 'int', 'int', 'int', 'int', 'int'])
+    Esta classe adere à interface esperada pelo `BaseGATuner`, fornecendo
+    os limites dos genes e os métodos `decode` e `evaluate`.
+    """
 
-    def __init__(self, Xtr, ytr, Xv, yv, use_weights=False, **kwargs):
+    n_layers: List[int] = list(range(1, 10))
+    units: List[int] = list(range(1, 100))
+    dropout: List[float] = [0.0, 0.05, 0.1, 0.15, 0.2]
+    acts: List[Type[nn.Module]] = [nn.Tanh, nn.Sigmoid, nn.ReLU, nn.LeakyReLU]
+    bss: List[int] = list(range(8, 65, 8))  # Batch sizes em potências de 2
+    lr_log10: List[float] = [1e-2, 5e-3, 1e-3, 5e-4, 1e-4]
+
+    bounds: NDArray = np.array(
+        [
+            [0, len(n_layers) - 1], [0, len(units) - 1],
+            [0, len(dropout) - 1], [0, len(acts) - 1],
+            [0, len(bss) - 1], [0, len(lr_log10) - 1],
+        ]
+    )
+    types: NDArray = np.array(["int", "int", "int", "int", "int", "int"])
+
+    def __init__(
+        self,
+        Xtr: NDArray, ytr: NDArray, Xv: NDArray, yv: NDArray,
+        use_weights: bool = False, **kwargs: Any
+    ) -> None:
+        """
+        Inicializa o espaço de busca com os dados de treino e validação.
+
+        Args:
+            Xtr (NDArray): Features de treino.
+            ytr (NDArray): Alvo de treino.
+            Xv (NDArray): Features de validação.
+            yv (NDArray): Alvo de validação.
+            use_weights (bool): Se verdadeiro, aplica pesos às amostras.
+            **kwargs: Parâmetros de ponderação ('thr', 'w_minor', 'w_major').
+        """
         self.Xt = torch.from_numpy(Xtr).to(config.DEVICE)
         self.yt = torch.from_numpy(ytr).to(config.DEVICE)
         self.Xv = torch.from_numpy(Xv).to(config.DEVICE)
@@ -29,64 +63,139 @@ class MLPBlockSpace:
         self.seed0 = config.SEED
 
         if use_weights:
-            self.wt = torch.from_numpy(np.where(ytr.flatten() > kwargs['thr'], kwargs['w_minor'], kwargs['w_major']).astype(np.float32)).to(config.DEVICE)
-            self.wv = torch.from_numpy(np.where(yv.flatten() > kwargs['thr'], kwargs['w_minor'], kwargs['w_major']).astype(np.float32)).to(config.DEVICE)
+            self.wt = self._create_weights(ytr, **kwargs)
+            self.wv = self._create_weights(yv, **kwargs)
         else:
-            self.wt = torch.ones_like(self.yt).to(config.DEVICE)
-            self.wv = torch.ones_like(self.yv).to(config.DEVICE)
+            self.wt = torch.ones_like(self.yt).to(self.dev)
+            self.wv = torch.ones_like(self.yv).to(self.dev)
+
+    def _create_weights(self, y_data: NDArray, **kwargs: Any) -> torch.Tensor:
+        """Cria um tensor de pesos para um dado conjunto de alvos."""
+        weights = np.where(
+            y_data.flatten() > kwargs["thr"], kwargs["w_minor"], kwargs["w_major"]
+        ).astype(np.float32)
+        return torch.from_numpy(weights).to(self.dev)
 
     @staticmethod
-    def decode(g):
-        return dict(n_layers=MLPBlockSpace.n_layers[int(g[0])], units=MLPBlockSpace.units[int(g[1])],
-                    drop=MLPBlockSpace.dropout[int(g[2])], act=MLPBlockSpace.acts[int(g[3])],
-                    batch=MLPBlockSpace.bss[int(g[4])], lr=MLPBlockSpace.lr_log10[int(g[5])])
+    def decode(gene: NDArray) -> Dict[str, Any]:
+        """
+        Decodifica um gene (array de índices) em um dicionário de
+        hiperparâmetros legíveis.
 
-    def _build(self, cfg):
+        Args:
+            gene (NDArray): O indivíduo do AG a ser decodificado.
+
+        Returns:
+            Dict[str, Any]: Um dicionário com os hiperparâmetros nominais.
+        """
+        return {
+            "n_layers": MLPBlockSpace.n_layers[int(gene[0])],
+            "units": MLPBlockSpace.units[int(gene[1])],
+            "drop": MLPBlockSpace.dropout[int(gene[2])],
+            "act": MLPBlockSpace.acts[int(gene[3])],
+            "batch": MLPBlockSpace.bss[int(gene[4])],
+            "lr": MLPBlockSpace.lr_log10[int(gene[5])],
+        }
+
+    def _build(self, cfg: Dict[str, Any]) -> nn.Sequential:
+        """
+        Constrói a arquitetura do modelo MLP com base na configuração fornecida.
+
+        Args:
+            cfg (Dict[str, Any]): Dicionário de hiperparâmetros.
+
+        Returns:
+            nn.Sequential: O modelo PyTorch construído e pronto para treino.
+        """
         layers = []
-        in_f = self.in_dim
-        drop_block = np.random.randint(0, cfg['n_layers']) if cfg['n_layers'] > 0 else -1
-        for idx in range(cfg['n_layers']):
-            layers.extend([nn.Linear(in_f, cfg['units']), nn.BatchNorm1d(cfg['units']), cfg['act']()])
-            if idx == drop_block and cfg['drop'] > 0: layers.append(nn.Dropout(cfg['drop']))
-            in_f = cfg['units']
-        layers.append(nn.Linear(in_f, 1))
+        in_features = self.in_dim
+        drop_layer_idx = (
+            np.random.randint(0, cfg["n_layers"]) if cfg["n_layers"] > 0 else -1
+        )
+        for i in range(cfg["n_layers"]):
+            layers.extend([
+                nn.Linear(in_features, cfg["units"]),
+                nn.BatchNorm1d(cfg["units"]),
+                cfg["act"](),
+            ])
+            if i == drop_layer_idx and cfg["drop"] > 0:
+                layers.append(nn.Dropout(cfg["drop"]))
+            in_features = cfg["units"]
+        layers.append(nn.Linear(in_features, 1))
         return nn.Sequential(*layers).to(self.dev)
 
-    def _train_model(self, cfg, rep):
+    def _train_model(
+        self, cfg: Dict[str, Any], rep: int
+    ) -> Tuple[nn.Module, List[float], List[float]]:
+        """
+        Executa o ciclo de treino e validação para uma configuração do modelo.
+
+        Implementa um loop de treino com otimizador Adam, Mean Absolute Error
+        (MAE) como função de perda e um critério de parada antecipada (early
+        stopping) para evitar overfitting.
+
+        Args:
+            cfg (Dict[str, Any]): Dicionário de hiperparâmetros.
+            rep (int): O número da repetição (para controle de semente).
+
+        Returns:
+            Tuple[nn.Module, List[float], List[float]]:
+                - O modelo treinado.
+                - O histórico de loss de treino por época.
+                - O histórico de loss de validação por época.
+        """
         torch.manual_seed(self.seed0 + rep)
         model = self._build(cfg)
-        opt = optim.Adam(model.parameters(), lr=cfg['lr'])
+        optimizer = optim.Adam(model.parameters(), lr=cfg["lr"])
+        dataset = torch.utils.data.TensorDataset(self.Xt, self.yt, self.wt.unsqueeze(1))
         loader = torch.utils.data.DataLoader(
-            torch.utils.data.TensorDataset(self.Xt, self.yt, self.wt.unsqueeze(1)),
-            batch_size=cfg['batch'], shuffle=True, drop_last=True
+            dataset, batch_size=cfg["batch"], shuffle=True, drop_last=True
         )
-        train_hist, val_hist = [], []
-        wait = 0
-        for epoch in range(100):
+
+        train_loss_history, val_loss_history = [], []
+        wait_epochs, patience = 0, 5
+
+        for _ in range(100):
             model.train()
-            epoch_train_loss = []
+            epoch_train_losses = []
             for xb, yb, wb in loader:
-                opt.zero_grad()
-                pred = model(xb)
-                loss = (torch.abs(pred - yb) * wb).mean()
+                optimizer.zero_grad()
+                predictions = model(xb)
+                loss = (torch.abs(predictions - yb) * wb).mean()
                 loss.backward()
-                opt.step()
-                epoch_train_loss.append(loss.item())
-            train_hist.append(np.mean(epoch_train_loss))
+                optimizer.step()
+                epoch_train_losses.append(loss.item())
+            train_loss_history.append(np.mean(epoch_train_losses))
 
             model.eval()
             with torch.no_grad():
-                v_loss = (torch.abs(model(self.Xv) - self.yv) * self.wv.unsqueeze(1)).mean().item()
-                val_hist.append(v_loss)
-            
-            if epoch > 10 and (val_hist[-1] > val_hist[-2]):
-                wait += 1
-            else:
-                wait = 0
-            if wait >= 5: break
-        return model, train_hist, val_hist
+                val_preds = model(self.Xv)
+                val_loss = (torch.abs(val_preds - self.yv) * self.wv.unsqueeze(1)).mean().item()
+                val_loss_history.append(val_loss)
 
-    def evaluate(self, cfg, rep):
+            if len(val_loss_history) > 1 and val_loss_history[-1] > val_loss_history[-2]:
+                wait_epochs += 1
+            else:
+                wait_epochs = 0
+            if wait_epochs >= patience:
+                break
+        return model, train_loss_history, val_loss_history
+
+    def evaluate(self, cfg: Dict[str, Any], rep: int) -> float:
+        """
+        Avalia a performance de uma configuração, retornando sua pontuação de
+        fitness.
+
+        O fitness é o R² negativo, pois o AG foi projetado para minimizar a
+        função objetivo.
+
+        Args:
+            cfg (Dict[str, Any]): Dicionário de hiperparâmetros.
+            rep (int): O número da repetição.
+
+        Returns:
+            float: A pontuação de fitness (menor é melhor).
+        """
         model, _, _ = self._train_model(cfg, rep)
         with torch.no_grad():
             y_pred_val = model(self.Xv)
