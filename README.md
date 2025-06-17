@@ -14,10 +14,11 @@ O dataset original, contendo 463 amostras, passou por um processo de tratamento 
 
 ## Análise breve do dataset
 
-A variável target CBR nessa base de dados, com relação à quantidade de amostras, está mal distribuída no intervalo de 1 até 155:
+A variável target CBR nessa base de dados, com relação à quantidade de amostras, está mal distribuída no intervalo de 1 até 155, o que leva a problemas iniciais de treinamento dos modelos.
 
 ![Image](https://github.com/user-attachments/assets/522970d4-d667-46ae-ab90-552a991eaba4)
 
+>A proposta utilizada é a possibilidade de atribuição de pesos para as amostras de CBR que tem o valor maior que um valor fixo que o usuário definir, para uma análise mais profunda de como o modelo lida com estes testes.
 
 ## 📚 Referências
 * YABI, C. P. et al. **Prediction of CBR by Deep Artificial Neural Networks with Hyperparameter Optimization by Simulated Annealing**. Indian Geotechnical Journal, v. 54, n. 1, p. 121-137, fev. 2024. Disponível em: <https://doi.org/10.1007/s40098-024-00870-4>. Acesso em: 3 jun. 2025.
@@ -35,7 +36,9 @@ A metodologia central deste trabalho consiste em aplicar técnicas de otimizaç�
 1.  **Rede Neural Artificial (MLP - Multi-Layer Perceptron)**
 2.  **Random Forest (Floresta Aleatória)**
 
-O framework é projetado para executar esses experimentos de forma sistemática, registrando métricas de performance, logs detalhados e visualizações para cada execução, permitindo uma análise comparativa robusta entre os modelos.
+>O framework é projetado para executar esses experimentos de forma sistemática, registrando métricas de performance, logs detalhados e visualizações para cada execução, permitindo uma análise comparativa robusta entre os modelos.
+
+![Image](https://github.com/user-attachments/assets/0382240d-1163-43be-9d6c-810b9c30139a)
 
 ---
 
