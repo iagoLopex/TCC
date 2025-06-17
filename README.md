@@ -1,4 +1,4 @@
-# Projeto: Otimização de Hiperparâmetros para Predição de CBR
+# Otimização de Hiperparâmetros com Algoritmo Genético: Uma Análise Comparativa entre Artificial Neural Networks e Random Forest para Predição do Índice de Suporte Califórnia
 
 > Este projeto utiliza um Algoritmo Genético (AG) para otimizar os hiperparâmetros de modelos de Machine Learning (Rede Neural MLP e Random Forest) com o objetivo de prever o valor do California Bearing Ratio (CBR) de solos.
 
@@ -11,6 +11,13 @@ O conjunto de dados utilizado neste projeto foi extraído do estudo de doutorado
 > FERREIRA, JOSÉ GUSTAVO HERMIDA DE MELLO. **Tratamento de Dados Geotécnicos Para Predição de Módulos de Resiliência de Solos e Britas Utilizando Ferramentas de Data Mining**. Tese (D.Sc., Engenharia Civil) - COPPE/UFRJ, Rio de Janeiro, 2008.
 
 O dataset original, contendo 463 amostras, passou por um processo de tratamento e curadoria para esta análise. As variáveis foram renomeadas para maior clareza (e.g., `CH`, `IP`, `CBR`). Para cada experimento, um subconjunto específico de features é selecionado (conforme definido em `config.py`). Subsequentemente, todas as amostras (linhas) que continham valores ausentes (`NaN`) em qualquer uma das colunas selecionadas foram removidas (`dropna()`) para garantir a qualidade e a integridade dos dados de entrada para os modelos.
+
+## Análise breve do dataset
+
+A variável target CBR nessa base de dados, com relação à quantidade de amostras, está mal distribuída no intervalo de 1 até 155:
+
+![Image](https://github.com/user-attachments/assets/522970d4-d667-46ae-ab90-552a991eaba4)
+
 
 ## 📚 Referências
 * YABI, C. P. et al. **Prediction of CBR by Deep Artificial Neural Networks with Hyperparameter Optimization by Simulated Annealing**. Indian Geotechnical Journal, v. 54, n. 1, p. 121-137, fev. 2024. Disponível em: <https://doi.org/10.1007/s40098-024-00870-4>. Acesso em: 3 jun. 2025.
