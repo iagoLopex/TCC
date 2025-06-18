@@ -187,7 +187,7 @@ MODEL_CLASSES = {"MLP": MLPBlockSpace, "RF": RandomForestSpace, "GB": GradientBo
  2. Configure e Rode: No config.py, mude DATASET = "D4" e execute o main.py.
 
 👤 Autor
-Iago Lopes
+Iago de Souza Lopes
 
 GitHub: iagoLopex
 <!-- end list -->
