@@ -88,37 +88,34 @@ class BaseGATuner:
         with mp.Pool(self.n_jobs) as pool:
             return np.array(pool.map(self._score, population))
 
-    def run(self) -> Tuple[NDArray, float, List[Dict[str, Any]]]:
+    def run(self) -> Tuple[NDArray, float, List[Dict[str, Any]], List[float]]:
         """
         Executa o ciclo completo do Algoritmo Genético.
 
         Returns:
-            Tuple[NDArray, float, List[Dict[str, Any]]]:
+            Tuple[NDArray, float, List[Dict[str, Any]], List[float]]:
                 - O melhor indivíduo (gene) encontrado.
                 - A melhor pontuação de fitness (menor é melhor).
                 - O histórico de resumos de cada geração.
+                - O histórico de fitness do melhor indivíduo de cada geração.
         """
         population = np.array([self._rand() for _ in range(self.pop)])
         fitness = self._eval_pop(population)
         bar = tqdm(range(self.gens), desc="Otimizando com GA", unit="gen", leave=False)
 
         for gen in bar:
-            # 1. Seleção: os melhores indivíduos (elite) sobrevivem
             elite_indices = fitness.argsort()[: self.elite_n]
             offspring = list(population[elite_indices])
 
-            # 2. Reprodução: gera o resto da população com crossover e mutação
             while len(offspring) < self.pop:
                 p1, p2 = self.rng.choice(population, 2, replace=False)
                 c1, c2 = self._cx(p1, p2)
                 offspring.extend([self._mut(c1), self._mut(c2)])
 
-            # 3. Avaliação da nova geração
             population = np.array(offspring)[: self.pop]
             fitness = self._eval_pop(population)
             best_fitness_in_gen = fitness.min()
 
-            # 4. Registro e Log
             best_individual_in_gen = population[fitness.argmin()]
             gen_summary = {
                 "generation": gen + 1, "total_generations": self.gens,
@@ -131,11 +128,10 @@ class BaseGATuner:
             bar.set_postfix(best_R2=f"{-best_fitness_in_gen:.4f}")
             self.history.append(best_fitness_in_gen)
 
-            # 5. Critério de Parada Antecipada
             if (len(self.history) > self.patience and
-                    np.std(self.history[-self.patience:]) < 1e-4):
+                np.std(self.history[-self.patience:]) < 1e-4):
                 logging.warning("Parada antecipada: performance estabilizou.")
                 break
 
         best_idx = fitness.argmin()
-        return population[best_idx], fitness[best_idx], self.generation_history
+        return population[best_idx], fitness[best_idx], self.generation_history, self.history

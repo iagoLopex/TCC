@@ -91,11 +91,38 @@ def _analyze_performance_by_bins(
             )
     console.print(table)
 
+def _plot_ga_convergence(fitness_history: List[float], results_path: str) -> None:
+    """Gera e salva o gráfico de convergência do Algoritmo Genético."""
+    fig = plt.figure(figsize=(10, 6))
+    r2_history = [-f for f in fitness_history]
+    plt.plot(range(1, len(r2_history) + 1), r2_history, marker='o', linestyle='-', color='b')
+    plt.xlabel("Geração")
+    plt.ylabel("Melhor R² na População")
+    plt.title("Curva de Convergência do Algoritmo Genético")
+    plt.grid(True)
+    plt.xticks(range(1, len(r2_history) + 1))
+    _save_plot(fig, results_path, "ga_convergence_curve.png")
+
+def _plot_prediction_tracking(y_true: NDArray, y_pred: NDArray, results_path: str) -> None:
+    """Gera e salva o gráfico de rastreamento de predições vs. valores reais."""
+    fig = plt.figure(figsize=(15, 7))
+    sample_indices = range(len(y_true))
+    plt.plot(sample_indices, y_true.flatten(), label='Valores Reais', color='gray', marker='o', linestyle='-')
+    plt.plot(sample_indices, y_pred.flatten(), label='Valores Preditos', color='darkorange', marker='x', linestyle='--')
+    plt.xlabel("Índice da Amostra de Teste")
+    plt.ylabel("CBR")
+    plt.title("Rastreamento de Valores Preditos vs. Reais")
+    plt.legend()
+    plt.grid(True)
+    _save_plot(fig, results_path, "prediction_tracking.png")
+
 
 def analyze_and_plot(
     final_model: Any, scaler_y: StandardScaler, X_dev_scaled: NDArray,
     y_dev_real: NDArray, X_test_scaled: NDArray, y_test_real: NDArray,
     results_path: str, feature_names: List[str],
+    generation_history: List[Dict],
+    fitness_history: List[float],
     train_hist: Optional[List[float]] = None,
     val_hist: Optional[List[float]] = None,
 ) -> None:
@@ -110,27 +137,27 @@ def analyze_and_plot(
     metrics_dev = calculate_regression_metrics(y_dev_real, pred_dev_real)
     metrics_test = calculate_regression_metrics(y_test_real, pred_test_real)
 
-    logging.info(
-        "Métricas de Performance",
-        extra={"json_fields": {"dev_set": metrics_dev, "test_set": metrics_test}},
-    )
+    logging.info("Métricas de Performance", extra={"json_fields": {"dev_set": metrics_dev, "test_set": metrics_test}})
 
     console.print("\n[bold]--- Tabela de Performance (Treino vs. Teste) ---[/bold]")
     table = Table(title="Comparativo de Métricas")
+    # ... (código da tabela sem alterações) ...
     table.add_column("Métrica", style="cyan")
     table.add_column("Treino (Dev Set)", style="yellow")
     table.add_column("Teste", style="green")
     for metric_name in metrics_dev:
-        table.add_row(
-            metric_name, f"{metrics_dev[metric_name]:.3f}", f"{metrics_test[metric_name]:.3f}"
-        )
+        table.add_row(metric_name, f"{metrics_dev[metric_name]:.3f}", f"{metrics_test[metric_name]:.3f}")
     console.print(table)
+
+    # --- INÍCIO DA CHAMADA DAS NOVAS ANÁLISES ---
+    console.print("\n[bold]--- Análises Adicionais da Otimização e Performance ---[/bold]")
+    _plot_ga_convergence(fitness_history, results_path)
+    _plot_prediction_tracking(y_test_real, pred_test_real, results_path)
+    # --- FIM DA CHAMADA DAS NOVAS ANÁLISES ---
 
     if config.MODEL_TO_OPTIMIZE == "RF":
         importances = final_model.feature_importances_
-        feature_df = pd.DataFrame(
-            {"Feature": feature_names, "Importância": importances}
-        ).sort_values(by="Importância", ascending=False)
+        feature_df = pd.DataFrame({"Feature": feature_names, "Importância": importances}).sort_values(by="Importância", ascending=False)
         fig = plt.figure(figsize=(10, max(6, len(feature_names) * 0.4)))
         sns.barplot(x="Importância", y="Feature", data=feature_df, palette="viridis")
         plt.title("Importância das Features (Random Forest)")

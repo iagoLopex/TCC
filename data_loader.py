@@ -44,7 +44,7 @@ def load_and_prepare_data(
     column_map = {
         "D1": ["D6", "CH", "CY", "CBR"],
         "D2": ["D6", "CH", "CY", "IP", "CBR"],
-        "D3": ["IG", "EXP", "D3", "D4", "D5", "D6", "CH", "CY", "IP", "LL", "CBR"],
+        "D3": ["IG", "EXP", "D5", "D6", "CH", "CY", "IP", "LL", "CBR"],
     }
     # Usa 'D3' como padrão se a opção não for encontrada
     selected_columns = column_map.get(dataset_option, column_map["D3"])

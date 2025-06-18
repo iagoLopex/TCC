@@ -156,9 +156,7 @@ python3 main.py
 >O script começará a otimização. Você verá o progresso no terminal e, ao final, uma nova pasta será criada dentro de results/ com todos os logs e gráficos da execução:
 
 
-![Image](https://github.com/user-attachments/assets/006d4d1a-490a-4144-81b5-828637007a31)
-
-![Image](https://github.com/user-attachments/assets/c7a0961e-1e25-4fdf-9035-36ade576f83b)
+![Image](https://github.com/user-attachments/assets/7f96e19a-5100-4fac-a7c8-bae62bf89b13)
 
 
 ## 📊 Análise dos Resultados

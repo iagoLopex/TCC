@@ -16,12 +16,12 @@ import torch
 
 # --- Parâmetros do Experimento ---
 CSV_PATH: str = "data/12_2_3-Jose_Gustavo_2008.xlsx"
-DATASET: str = "D3"  # Opções: 'D1', 'D2', 'D3' (genérico)
+DATASET: str = "D3"            # Opções: 'D1', 'D2', 'D3' (genérico)
 
 # --- Configuração do Modelo e Validação ---
 MODEL_TO_OPTIMIZE: str = "MLP"  # Opções: 'MLP', 'RF'
-USE_WEIGHTS: bool = False
-VALIDATION_METHOD: str = "Holdout"  # Opções: 'Holdout', 'K-fold'
+USE_WEIGHTS: bool = True
+VALIDATION_METHOD: str = "K-fold"  # Opções: 'Holdout', 'K-fold'
 
 # --- Configurações Técnicas ---
 DEVICE: str = "cuda" if torch.cuda.is_available() else "cpu"
@@ -30,12 +30,12 @@ K_FOLDS: int = 5
 SEED: int = 42
 
 # --- Parâmetros de Ponderação de Amostras (se USE_WEIGHTS = True) ---
-WEIGHT_PARAMS: Dict[str, float] = {"thr": 50.0, "w_major": 1.0, "w_minor": 1.5}
+WEIGHT_PARAMS: Dict[str, float] = {"thr": 50.0, "w_major": 1.0, "w_minor": 1.3}
 
 # --- Parâmetros do Algoritmo Genético ---
 GA_PARAMS: Dict[str, Any] = {
-    "pop": 2,       # Tamanho da população
-    "gens": 3,      # Número de gerações
+    "pop": 2,        # Tamanho da população
+    "gens": 3,       # Número de gerações
     "elite": 0.1,    # Fração da elite
     "mut": 0.1,      # Probabilidade de mutação
     "cx": 0.9,       # Probabilidade de crossover

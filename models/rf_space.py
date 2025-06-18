@@ -1,7 +1,7 @@
 """
 Define o espaço de busca e a lógica de avaliação para um modelo Random Forest.
 """
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from numpy.typing import NDArray
@@ -17,13 +17,25 @@ class RandomForestSpace:
     Forest para ser usado pelo Algoritmo Genético.
 
     Esta classe adere à interface esperada pelo `BaseGATuner`, fornecendo
-    os limites dos genes e os métodos `decode` e `evaluate`.
+    os limites dos genes e os métodos `decode` e `evaluate`. A seleção de
+    hiperparâmetros foi expandida para uma busca mais granular e completa.
     """
-    n_estimators_opts: List[int] = [50, 100, 200, 300, 400]
-    max_depth_opts: List[Optional[int]] = [5, 10, 20, 30, None]
-    min_samples_split_opts: List[int] = [2, 5, 10]
-    min_samples_leaf_opts: List[int] = [1, 2, 4]
-    max_features_opts: List[Optional[str]] = ["sqrt", "log2", None]
+
+    # De 50 a 500 árvores, com passo de 50.
+    n_estimators_opts: List[int] = list(range(50, 501, 50))
+
+    # De 5 a 29 de profundidade, com passo de 3, mais a opção de árvore completa.
+    max_depth_opts: List[Optional[int]] = list(range(5, 31, 3)) + [None]
+
+    # Todos os valores inteiros de 2 a 20 para critério de divisão.
+    min_samples_split_opts: List[int] = list(range(2, 21))
+
+    # Todos os valores inteiros de 1 a 15 para o mínimo em uma folha.
+    min_samples_leaf_opts: List[int] = list(range(1, 16))
+
+    # Opção "sqrt" e uma variação de 10% a 100% do total de features.
+    max_features_float_opts: List[float] = np.linspace(0.1, 1.0, 10).round(2).tolist()
+    max_features_opts: List[Union[str, float]] = ["sqrt"] + max_features_float_opts
 
     bounds: NDArray = np.array(
         [
@@ -38,8 +50,12 @@ class RandomForestSpace:
 
     def __init__(
         self,
-        Xtr: NDArray, ytr: NDArray, Xv: NDArray, yv: NDArray,
-        use_weights: bool = False, **kwargs: Any
+        Xtr: NDArray,
+        ytr: NDArray,
+        Xv: NDArray,
+        yv: NDArray,
+        use_weights: bool = False,
+        **kwargs: Any,
     ) -> None:
         """
         Inicializa o espaço de busca com os dados de treino e validação.
@@ -97,9 +113,7 @@ class RandomForestSpace:
                 - O modelo treinado.
                 - None, None para manter a consistência com a interface do MLP.
         """
-        model = RandomForestRegressor(
-            **cfg, random_state=self.seed0 + rep, n_jobs=-1
-        )
+        model = RandomForestRegressor(**cfg, random_state=self.seed0 + rep, n_jobs=-1)
         model.fit(self.Xtr, self.ytr, sample_weight=self.w_tr)
         return model, None, None
 

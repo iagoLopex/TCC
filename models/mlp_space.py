@@ -25,9 +25,14 @@ class MLPBlockSpace:
     n_layers: List[int] = list(range(1, 10))
     units: List[int] = list(range(1, 100))
     dropout: List[float] = [0.0, 0.05, 0.1, 0.15, 0.2]
-    acts: List[Type[nn.Module]] = [nn.Tanh, nn.Sigmoid, nn.ReLU, nn.LeakyReLU]
-    bss: List[int] = list(range(8, 65, 8))  # Batch sizes em potências de 2
-    lr_log10: List[float] = [1e-2, 5e-3, 1e-3, 5e-4, 1e-4]
+    acts: List[Type[nn.Module]] = [nn.Tanh, nn.Sigmoid, nn.LeakyReLU]
+    bss: List[int] = list(range(6, 65, 1))  # Batch sizes [6, 7, 8, ..., 65]
+    lr_log10: List[float] = [
+        1e-1, 1e-2, 1e-3, 1e-4,  # 0.1, 0.01, ...
+        2e-1, 2e-2, 2e-3, 2e-4,  # 0.2, 0.02, ...
+        5e-1, 5e-2, 5e-3, 5e-4,  # 0.5, 0.05, 0.005, 0.0005
+    ]
+    
 
     bounds: NDArray = np.array(
         [
