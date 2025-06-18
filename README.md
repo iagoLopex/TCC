@@ -153,7 +153,13 @@ pip install -r requirements.txt
 python3 main.py
 ```
 
->O script começará a otimização. Você verá o progresso no terminal e, ao final, uma nova pasta será criada dentro de results/ com todos os logs e gráficos da execução.
+>O script começará a otimização. Você verá o progresso no terminal e, ao final, uma nova pasta será criada dentro de results/ com todos os logs e gráficos da execução:
+
+
+![Image](https://github.com/user-attachments/assets/006d4d1a-490a-4144-81b5-828637007a31)
+
+![Image](https://github.com/user-attachments/assets/c7a0961e-1e25-4fdf-9035-36ade576f83b)
+
 
 ## 📊 Análise dos Resultados
 
@@ -162,6 +168,8 @@ python3 main.py
 - run_log.jsonl: Um arquivo com o log completo e detalhado de cada geração do algoritmo genético, em formato JSON e os hiperparâmetros utilizados.
 - *.png: Os gráficos de avaliação do melhor modelo, como a curva de aprendizado e a análise de resíduos, já salvos como imagens.
 - final_model.joblib ou final_model.pth: O objeto do modelo final treinado, pronto para ser carregado e usado em outras análises (como no notebooks_analysis).
+
+![Image](https://github.com/user-attachments/assets/029a8a76-2144-42de-bd01-7a4a863ce689)
 
 ## 💡 Dando Continuidade ao Projeto
 A estrutura modular foi projetada para facilitar a expansão.
