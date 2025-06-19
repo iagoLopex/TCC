@@ -21,7 +21,7 @@ DATASET: str = "D3"            # Opções: 'D1', 'D2', 'D3' (genérico)
 # --- Configuração do Modelo e Validação ---
 MODEL_TO_OPTIMIZE: str = "MLP"  # Opções: 'MLP', 'RF'
 USE_WEIGHTS: bool = True
-VALIDATION_METHOD: str = "K-fold"  # Opções: 'Holdout', 'K-fold'
+VALIDATION_METHOD: str = "Holdout"  # Opções: 'Holdout', 'K-fold'
 
 # --- Configurações Técnicas ---
 DEVICE: str = "cuda" if torch.cuda.is_available() else "cpu"

@@ -13,12 +13,14 @@ import json
 import logging
 import multiprocessing as mp
 import os
+import time
 import warnings
 from datetime import datetime
 from typing import Any, Dict, List, Tuple
 
 import joblib
 import numpy as np
+import pandas as pd
 import torch
 from numpy.typing import NDArray
 from pythonjsonlogger.jsonlogger import JsonFormatter
@@ -62,7 +64,6 @@ def log_initial_config(console: Console) -> None:
     console.print("[bold]Configurações da Execução:[/bold]")
     console.print(Syntax(json.dumps(run_config, indent=4), "json", theme="monokai"))
 
-
 def run_optimization(console: Console, eval_data: Dict[str, Any]) -> Tuple[Dict[str, Any], float, List[Dict], List[float]]:
     """Executa a otimização com o Algoritmo Genético."""
     console.print("\n[bold]--- Etapa 3: Iniciando Otimização de Hiperparâmetros ---[/bold]")
@@ -84,9 +85,16 @@ def run_optimization(console: Console, eval_data: Dict[str, Any]) -> Tuple[Dict[
     console.print(Syntax(json.dumps(printable_config, indent=4), "json", theme="monokai"))
     return best_config, -best_score, generation_history, fitness_history
 
+def format_duration(seconds: float) -> str:
+    """Formata um tempo em segundos para uma string legível (minutos e segundos)."""
+    mins, secs = divmod(seconds, 60)
+    return f"{int(mins)} minutos e {secs:.2f} segundos"
 
 def main() -> None:
     """Ponto de entrada principal que orquestra todo o fluxo do experimento."""
+
+    start_time = time.time()
+
     run_results_path, console = setup_logging_and_results_dir()
     config.set_seeds()
     log_initial_config(console)
@@ -95,6 +103,13 @@ def main() -> None:
     Xdf, y = load_and_prepare_data(config.CSV_PATH, config.DATASET)
     if Xdf.empty:
         return
+    
+    console.print(f"Dataset carregado com {Xdf.shape[0]} amostras e {Xdf.shape[1]} features.")
+    data_stats = {
+        "dataset_shape_after_cleaning": Xdf.shape,
+        "target_variable_stats": y.describe().to_dict()
+    }
+    logging.info("Estatísticas do Dataset Utilizado", extra={"json_fields": data_stats})
 
     console.print(f"\n[bold]--- Etapa 2: Configurando Estratégia de Validação: {config.VALIDATION_METHOD} ---[/bold]")
     X_dev, X_test, y_dev, y_test = train_test_split(
@@ -149,6 +164,16 @@ def main() -> None:
         train_hist=train_hist, val_hist=val_hist,
         generation_history=generation_history,
         fitness_history=fitness_history
+    )
+
+    end_time = time.time()
+    total_duration = end_time - start_time
+    duration_str = format_duration(total_duration)
+
+    console.print(Panel(f"Execução Concluída em: [bold yellow]{duration_str}[/bold yellow]", title="[bold]FIM[/bold]", expand=False))
+    logging.info(
+        "Execução finalizada.",
+        extra={"json_fields": {"total_execution_time_seconds": total_duration}}
     )
 
 
