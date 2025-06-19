@@ -10,7 +10,7 @@ O conjunto de dados utilizado neste projeto foi extraído do estudo de doutorado
 
 > FERREIRA, JOSÉ GUSTAVO HERMIDA DE MELLO. **Tratamento de Dados Geotécnicos Para Predição de Módulos de Resiliência de Solos e Britas Utilizando Ferramentas de Data Mining**. Tese (D.Sc., Engenharia Civil) - COPPE/UFRJ, Rio de Janeiro, 2008.
 
-O dataset original, contendo 463 amostras, passou por um processo de tratamento e curadoria para esta análise, restando 336 amostras que possuem o CBR não nulo. As variáveis foram renomeadas para maior clareza (e.g., `CH`, `IP`, `CBR`). Para cada experimento, um subconjunto específico de features é selecionado (conforme definido em `config.py`). Subsequentemente, todas as amostras (linhas) que continham valores ausentes (`NaN`) em qualquer uma das colunas selecionadas foram removidas (`dropna()`) para garantir a qualidade e a integridade dos dados de entrada para os modelos.
+O dataset original, contendo 463 amostras, passou por um processo de tratamento e curadoria para esta análise, restando algo entorno de 330 amostras que possuem o CBR não nulo. As variáveis foram renomeadas para maior clareza (e.g., `CH`, `IP`, `CBR`). Para cada experimento, um subconjunto específico de features é selecionado (conforme definido em `config.py`). Subsequentemente, todas as amostras (linhas) que continham valores ausentes (`NaN`) em qualquer uma das colunas selecionadas foram removidas (`dropna()`) para garantir a qualidade e a integridade dos dados de entrada para os modelos.
 
 ## Análise breve do dataset
 
