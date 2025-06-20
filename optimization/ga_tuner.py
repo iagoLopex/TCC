@@ -88,20 +88,22 @@ class BaseGATuner:
         with mp.Pool(self.n_jobs) as pool:
             return np.array(pool.map(self._score, population))
 
-    def run(self) -> Tuple[NDArray, float, List[Dict[str, Any]], List[float]]:
+    def run(self) -> Tuple[NDArray, float, List[Dict[str, Any]], List[float], str]:
         """
         Executa o ciclo completo do Algoritmo Genético.
 
         Returns:
-            Tuple[NDArray, float, List[Dict[str, Any]], List[float]]:
+            Tuple[NDArray, float, List[Dict[str, Any]], List[float], str]:
                 - O melhor indivíduo (gene) encontrado.
                 - A melhor pontuação de fitness (menor é melhor).
                 - O histórico de resumos de cada geração.
                 - O histórico de fitness do melhor indivíduo de cada geração.
+                - O motivo pelo qual a otimização terminou.
         """
         population = np.array([self._rand() for _ in range(self.pop)])
         fitness = self._eval_pop(population)
         bar = tqdm(range(self.gens), desc="Otimizando com GA", unit="gen", leave=False)
+        termination_reason = "Máximo de gerações atingido"
 
         for gen in bar:
             elite_indices = fitness.argsort()[: self.elite_n]
@@ -131,7 +133,8 @@ class BaseGATuner:
             if (len(self.history) > self.patience and
                 np.std(self.history[-self.patience:]) < 1e-4):
                 logging.warning("Parada antecipada: performance estabilizou.")
+                termination_reason = f"Parada antecipada na geração {gen + 1}"
                 break
 
         best_idx = fitness.argmin()
-        return population[best_idx], fitness[best_idx], self.generation_history, self.history
+        return population[best_idx], fitness[best_idx], self.generation_history, self.history, termination_reason

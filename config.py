@@ -19,7 +19,7 @@ CSV_PATH: str = "data/12_2_3-Jose_Gustavo_2008.xlsx"
 DATASET: str = "D3"            # Opções: 'D1', 'D2', 'D3' (genérico)
 
 # --- Configuração do Modelo e Validação ---
-MODEL_TO_OPTIMIZE: str = "MLP"  # Opções: 'MLP', 'RF'
+MODEL_TO_OPTIMIZE: str = "RF"  # Opções: 'MLP', 'RF'
 USE_WEIGHTS: bool = True
 VALIDATION_METHOD: str = "Holdout"  # Opções: 'Holdout', 'K-fold'
 

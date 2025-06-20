@@ -104,28 +104,35 @@ class MLPBlockSpace:
 
     def _build(self, cfg: Dict[str, Any]) -> nn.Sequential:
         """
-        Constrói a arquitetura do modelo MLP com base na configuração fornecida.
+        Constrói a arquitetura do modelo MLP com base na configuração.
+
+        A cada bloco (Linear -> BatchNorm -> Activation -> Dropout(caso maior que zero))
 
         Args:
             cfg (Dict[str, Any]): Dicionário de hiperparâmetros.
 
         Returns:
-            nn.Sequential: O modelo PyTorch construído e pronto para treino.
+            nn.Sequential: O modelo PyTorch construído.
         """
         layers = []
         in_features = self.in_dim
-        drop_layer_idx = (
-            np.random.randint(0, cfg["n_layers"]) if cfg["n_layers"] > 0 else -1
-        )
-        for i in range(cfg["n_layers"]):
-            layers.extend([
-                nn.Linear(in_features, cfg["units"]),
-                nn.BatchNorm1d(cfg["units"]),
-                cfg["act"](),
-            ])
-            if i == drop_layer_idx and cfg["drop"] > 0:
+
+        # Loop para criar cada bloco da rede
+        for _ in range(cfg["n_layers"]):
+            layers.extend(
+                [
+                    nn.Linear(in_features, cfg["units"]),
+                    nn.BatchNorm1d(cfg["units"]),
+                    cfg["act"](),
+                ]
+            )
+            # Aplica o dropout após cada bloco se a taxa for > 0
+            if cfg["drop"] > 0:
                 layers.append(nn.Dropout(cfg["drop"]))
+            
             in_features = cfg["units"]
+
+        # Camada de saída final que mapeia para um único valor
         layers.append(nn.Linear(in_features, 1))
         return nn.Sequential(*layers).to(self.dev)
 
