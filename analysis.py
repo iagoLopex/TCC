@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Optional, Type
 
 import joblib
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -95,15 +96,44 @@ def _analyze_performance_by_bins(
     console.print(table)
 
 def _plot_ga_convergence(fitness_history: List[float], results_path: str) -> None:
-    """Gera e salva o gráfico de convergência do Algoritmo Genético."""
-    fig = plt.figure(figsize=(10, 6))
+    """
+    Gera e salva o gráfico de convergência do Algoritmo Genético com
+    uma estética aprimorada.
+    """
+    sns.set_theme(style="whitegrid")
+    fig, ax = plt.subplots(figsize=(12, 7))
+
     r2_history = [-f for f in fitness_history]
-    plt.plot(range(1, len(r2_history) + 1), r2_history, marker='o', linestyle='-', color='b')
-    plt.xlabel("Geração")
-    plt.ylabel("Melhor R² na População")
-    plt.title("Curva de Convergência do Algoritmo Genético")
-    plt.grid(True)
-    plt.xticks(range(1, len(r2_history) + 1))
+    generations = range(1, len(r2_history) + 1)
+
+    # Plota a linha de evolução
+    ax.plot(
+        generations, r2_history, marker='o', markersize=6,
+        linestyle='-', linewidth=2, color='#007ACC',
+        label='Melhor R² por Geração'
+    )
+
+    # Destaca o melhor ponto encontrado em toda a busca
+    best_gen_idx = np.argmax(r2_history)
+    best_r2_value = r2_history[best_gen_idx]
+    ax.plot(
+        generations[best_gen_idx], best_r2_value,
+        marker='.', markersize=15, color="#FF0707",
+        linestyle='none', label=f'Melhor R² Global: {best_r2_value:.4f}'
+    )
+
+    # Garante que os ticks do eixo X sejam inteiros e não muito aglomerados
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True, nbins='auto'))
+    plt.xticks(rotation=-30, ha="right")  # Inclina os rótulos
+
+    # Melhora os títulos e rótulos
+    ax.set_xlabel("Geração", fontsize=12)
+    ax.set_ylabel("Melhor Fitness (R²)", fontsize=12)
+    ax.set_title("Curva de Convergência do Algoritmo Genético", fontsize=14, fontweight='bold')
+    ax.legend()
+    sns.despine(fig=fig, ax=ax)  # Remove as bordas superiores e direitas
+    fig.tight_layout() # Ajusta o layout para evitar cortes
+    
     _save_plot(fig, results_path, "ga_convergence_curve.png")
 
 def _plot_prediction_tracking(y_true: NDArray, y_pred: NDArray, results_path: str) -> None:

@@ -34,9 +34,9 @@ WEIGHT_PARAMS: Dict[str, float] = {"thr": 50.0, "w_major": 1.0, "w_minor": 1.3}
 
 # --- Parâmetros do Algoritmo Genético ---
 GA_PARAMS: Dict[str, Any] = {
-    "pop": 2,        # Tamanho da população
-    "gens": 3,       # Número de gerações
-    "elite": 0.1,    # Fração da elite
+    "pop": 20,        # Tamanho da população
+    "gens": 10,       # Número de gerações
+    "elite": 0.05,    # Fração da elite
     "mut": 0.1,      # Probabilidade de mutação
     "cx": 0.9,       # Probabilidade de crossover
     "patience": 10,  # Gerações sem melhora para parada antecipada
